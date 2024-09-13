@@ -58,4 +58,10 @@ public class MessageService {
         return msgDAO.getMessageByID(id);
     }
 
+    // delete mess by message ID
+    public Message deleteMessageByID (int id) {
+        // call dao
+        return msgDAO.deleteMessageByID(id);
+    }
+
 }

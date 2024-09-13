@@ -94,4 +94,37 @@ public class MessageDAO {
         return message; 
     }
 
+    // delete messaeg by id
+    public Message deleteMessageByID (int messageId) {
+        Message message = null;
+        
+        try {
+            // select the message to delete
+            String messageSelectSql = "select * from message where message_id = ?";
+            PreparedStatement selectStatement = connection.prepareStatement(messageSelectSql);
+            selectStatement.setInt(1, messageId);
+            ResultSet resultSet = selectStatement.executeQuery();
+            
+            // check if message exists
+            if(resultSet.next()) {
+                int posted_by = resultSet.getInt("posted_by");
+                String message_text = resultSet.getString("message_text");
+                long time_posted_epoch = resultSet.getLong("time_posted_epoch");
+
+                // create message to send as response
+                message = new Message(messageId, posted_by, message_text, time_posted_epoch);
+
+                // delete message from db
+                String deleteSql = "delete from message where message_id = ?";
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteSql);
+                deleteStatement.setInt(1, messageId);
+                deleteStatement.executeUpdate();
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return message;
+    }
+
+
 }

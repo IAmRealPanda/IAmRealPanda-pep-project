@@ -159,9 +159,22 @@ public class SocialMediaController {
         }
     }
 
-    // Req 6
-    private void deleteMessageByID(Context ctx) {
+    /*
+     * Req 6 Delete message by id. send response as deleted message. else send empty response
+     */
+    private void deleteMessageByID(Context ctx) throws JsonProcessingException {
+        // parse the id
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
 
+        // call service
+        Message deletedMessage = messageService.deleteMessageByID(id);
+        ObjectMapper mapper = new ObjectMapper();
+
+        if (deletedMessage != null) {
+            ctx.json(mapper.writeValueAsString(deletedMessage));
+        } else {
+            ctx.status(200).json("");
+        }
     }
     // Req 7
     private void updateMessage(Context ctx) throws JsonProcessingException {
