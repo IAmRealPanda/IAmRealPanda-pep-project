@@ -5,6 +5,7 @@ import io.javalin.http.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import DAO.UserDAO;
 import Model.Account;
 import Service.UserService;
 
@@ -16,6 +17,11 @@ import Service.UserService;
 public class SocialMediaController {
 
     private final UserService userService;
+    // no-arg constructor
+    public SocialMediaController() {
+        // Initialize userService here (either a default or mock implementation)
+        this.userService = new UserService(new UserDAO()); 
+    }
 
     public SocialMediaController(UserService userService) {
         this.userService = userService;
@@ -52,11 +58,15 @@ public class SocialMediaController {
     private void userRegistration(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
-        Account addedUser = userService.registerUser(account);
-        if(addedUser!=null){
-            ctx.json(mapper.writeValueAsString(addedUser));
-        }else{
+        try {
+            Account addedUser = userService.registerUser(account);
+            ctx.json(mapper.writeValueAsString(addedUser)).status(200);
+        } catch (IllegalArgumentException e) {
+        // input validation fails return 400
             ctx.status(400);
+        } catch (RuntimeException e) {
+        // any other errors  return 500
+            ctx.status(500);
         }
     }
 
@@ -66,7 +76,25 @@ public class SocialMediaController {
      * @throws JsonProcessingException
      */
     private void login(Context ctx) throws JsonProcessingException {
-    
+        ObjectMapper mapper = new ObjectMapper();
+        Account credentials = mapper.readValue(ctx.body(), Account.class);
+        
+        try {
+            Account account = userService.login(credentials.getUsername(), credentials.getPassword());
+            if (account != null) {
+                // Login successful, return the Account details
+                ctx.json(mapper.writeValueAsString(account)).status(200);
+            } else {
+                // Login failed, unauthorized
+                ctx.status(401);
+            }
+        } catch (IllegalArgumentException e) {
+            //  invalid input 
+            ctx.status(401);
+        } catch (RuntimeException e) {
+            // nexpected errors
+            ctx.status(500);
+        }
     }
 
     /**

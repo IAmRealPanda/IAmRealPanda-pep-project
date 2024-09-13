@@ -10,7 +10,7 @@ public class UserDAO {
     Connection connection = ConnectionUtil.getConnection();
 
     // Register User
-    public Account registerUser(Account account) {
+    public Account registerUser(Account account) throws SQLException {
         try {
             // sql statement
             String sql = "insert into account (username, password) values (?, ?)" ;
@@ -29,7 +29,7 @@ public class UserDAO {
                 return new Account(generated_author_id, account.getUsername(), account.getPassword());
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new SQLException("Error registering user: " + e.getMessage(), e);
         }
       
         return null;
@@ -63,5 +63,27 @@ public class UserDAO {
         return exists; // Return whether the username exists
     }
     
+    public Account validateLogin (String username, String password) throws SQLException {
+        String sql = "select * from account where username = ? and password = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // If a match is found, return the Account object
+            if (resultSet.next()) {
+                int accountId = resultSet.getInt("account_id");
+                String user = resultSet.getString("username");
+                String pass = resultSet.getString("password");
+                return new Account(accountId, user, pass); // Returning the matched Account
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error validating login: " + e.getMessage(), e);
+        }
+
+        // If no match found, return null
+        return null;
+    }
 
 }

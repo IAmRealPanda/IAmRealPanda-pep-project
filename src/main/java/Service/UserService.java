@@ -1,5 +1,7 @@
 package Service;
 
+import java.sql.SQLException;
+
 import DAO.UserDAO;
 import Model.Account;
 
@@ -40,7 +42,31 @@ public class UserService {
         if (userDAO.usernameExists(newUser.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
-        return userDAO.registerUser(newUser);
+        try {
+            // Attempt to register the user in the database
+            return userDAO.registerUser(newUser);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error registering user: " + e.getMessage(), e);
+        }
+    }
+
+    public Account login(String username, String password) {
+        //  validation
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Username and password cannot be blank");
+        }
+
+        try {
+            
+            Account account = userDAO.validateLogin(username, password);
+            if (account != null) {
+                return account;  // Login successful
+            } else {
+                return null;  // Login failed
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error during login: " + e.getMessage(), e);
+        }
     }
 
 }
