@@ -64,4 +64,16 @@ public class MessageService {
         return msgDAO.deleteMessageByID(id);
     }
 
+    // update message by ID
+    public Message updateMessageByID (int id, String newMessage) {
+
+        // validation
+        // blank message and under 255 char
+        if(newMessage == null || newMessage.isBlank() || newMessage.length() > 255) {
+            throw new IllegalArgumentException("Message cannot be blank and under 255 characters");
+        }
+        // call dao
+        return msgDAO.updateMessageByID(id,newMessage);
+    }
+
 }

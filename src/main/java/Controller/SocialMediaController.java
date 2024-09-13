@@ -53,7 +53,7 @@ public class SocialMediaController {
         app.get("/messages", this::getAllMessages); //4
         app.get("/messages/{message_id}", this::getMessageByID); //5
         app.delete("/messages/{message_id}", this::deleteMessageByID); //6
-        app.put("/messages/{message_id}", this::updateMessage); //7
+        app.patch("/messages/{message_id}", this::updateMessage); //7
         app.get("/accounts/{account_id}/messages", this::getAllMessagesByUser); //8
         return app;
     }
@@ -176,9 +176,34 @@ public class SocialMediaController {
             ctx.status(200).json("");
         }
     }
-    // Req 7
+    /*
+     * req 7 update the message and return the new message
+     */
     private void updateMessage(Context ctx) throws JsonProcessingException {
+    
+        try {
+            // parse the id
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
 
+            // extract the new updated message
+            ObjectMapper mapper = new ObjectMapper();
+            Message original = mapper.readValue(ctx.body(), Message.class);
+            String newMsgTxt = original.getMessage_text();
+
+            // call service
+            Message updtMsg = messageService.updateMessageByID(id, newMsgTxt);
+            if (updtMsg != null) {
+                ctx.json(mapper.writeValueAsString(updtMsg));
+            } else {
+                ctx.status(400);
+            }
+        } catch (IllegalArgumentException e) {
+            //  invalid input 
+            ctx.status(400);
+        } catch (RuntimeException e) {
+            // nexpected errors
+            ctx.status(500);
+        }
     }
 
     // Req 8
