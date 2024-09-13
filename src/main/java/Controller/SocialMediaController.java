@@ -5,9 +5,9 @@ import io.javalin.http.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import DAO.UserDAO;
-import Model.Account;
-import Service.UserService;
+import DAO.*;
+import Model.*;
+import Service.*;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -17,14 +17,18 @@ import Service.UserService;
 public class SocialMediaController {
 
     private final UserService userService;
+    private final MessageService messageService;
     // no-arg constructor
+
     public SocialMediaController() {
         // Initialize userService here (either a default or mock implementation)
-        this.userService = new UserService(new UserDAO()); 
+        this.userService = new UserService(new UserDAO());
+        this.messageService = new MessageService(new MessageDAO(), new UserDAO());
     }
 
-    public SocialMediaController(UserService userService) {
+    public SocialMediaController(UserService userService, MessageService messageService) {
         this.userService = userService;
+        this.messageService = messageService;
     }
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
@@ -103,7 +107,26 @@ public class SocialMediaController {
      * @throws JsonProcessingException
      */
     private void newMessage(Context ctx) throws JsonProcessingException {
-    
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            //deserialize
+            Message message = mapper.readValue(ctx.body(), Message.class);
+
+            //call service
+            Message createdMessage = messageService.newMessage(message);
+            if(createdMessage != null) {
+                ctx.json(mapper.writeValueAsString(createdMessage));
+            } else {
+                ctx.status(400);
+            }
+        } catch (IllegalArgumentException e) {
+            //  invalid input 
+            ctx.status(400);
+        }
+        // } catch (RuntimeException e) {
+        //     // nexpected errors
+        //     ctx.status(500);
+        // }
     }
     
     // Req 4

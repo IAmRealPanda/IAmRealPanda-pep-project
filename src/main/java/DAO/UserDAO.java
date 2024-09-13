@@ -62,6 +62,33 @@ public class UserDAO {
         
         return exists; // Return whether the username exists
     }
+
+    public boolean userExists(int id) {
+        Connection connection = ConnectionUtil.getConnection();
+        boolean exists = false;
+        
+        try {
+            // SQL query 
+            String sql = "select count(*) FROM account where account_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            
+            // fill params
+            preparedStatement.setInt(1, id);
+            
+            // Execute the query
+            ResultSet resultSet = preparedStatement.executeQuery();
+            
+            // Check the result
+            if (resultSet.next()) {
+                exists = resultSet.getInt(1) > 0;  // If count > 0, user exists
+            }
+    
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } 
+        
+        return exists; // Return whether the user exists
+    }
     
     public Account validateLogin (String username, String password) throws SQLException {
         String sql = "select * from account where username = ? and password = ?";
