@@ -2,6 +2,9 @@ package Controller;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -122,16 +125,20 @@ public class SocialMediaController {
         } catch (IllegalArgumentException e) {
             //  invalid input 
             ctx.status(400);
+        } catch (RuntimeException e) {
+            // nexpected errors
+            ctx.status(500);
         }
-        // } catch (RuntimeException e) {
-        //     // nexpected errors
-        //     ctx.status(500);
-        // }
     }
-    
-    // Req 4
-    private void getAllMessages(Context ctx) {
-    
+    /*
+     * Req 4 get all messages - return empty list if no messages found 
+     */
+    private void getAllMessages(Context ctx) throws JsonProcessingException  {
+        // call service
+        List<Message> allMessages = messageService.getAllMessages();
+        
+        ObjectMapper mapper = new ObjectMapper();
+        ctx.json(mapper.writeValueAsString(allMessages));
     }
 
     // REq 5
