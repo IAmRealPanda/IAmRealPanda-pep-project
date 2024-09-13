@@ -3,6 +3,8 @@ package Controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+import static org.mockito.ArgumentMatchers.matches;
+
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -141,9 +143,20 @@ public class SocialMediaController {
         ctx.json(mapper.writeValueAsString(allMessages));
     }
 
-    // REq 5
+    /*
+     * Req 5 get a message by message ID - empty message if no message found
+     */
     private void getMessageByID (Context ctx) throws JsonProcessingException {
-
+        // parse the id
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+        //service
+        Message message = messageService.getMessageByID(id);
+        ObjectMapper mapper = new ObjectMapper();
+        if (message != null) {
+            ctx.json(mapper.writeValueAsString(message));
+        } else {
+            ctx.status(200).json(""); 
+        }
     }
 
     // Req 6

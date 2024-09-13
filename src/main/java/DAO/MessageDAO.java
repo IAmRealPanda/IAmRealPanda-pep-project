@@ -41,6 +41,7 @@ public class MessageDAO {
 
     // Get all Messages
     public List<Message> getAllMessages() {
+
         List<Message> messages = new ArrayList<>();
 
         try {
@@ -65,4 +66,32 @@ public class MessageDAO {
     
         return messages; 
     }
+
+    // get message by message ID
+    public Message getMessageByID(int message_id) {
+        Message message = null;
+
+        try {
+            String sql = "select * from message where message_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            
+            preparedStatement.setInt(1, message_id);
+    
+            ResultSet resultSet = preparedStatement.executeQuery();
+    
+            // message found create message object
+            if (resultSet.next()) {
+                int posted_by = resultSet.getInt("posted_by");
+                String message_text = resultSet.getString("message_text");
+                long time_posted_epoch = resultSet.getLong("time_posted_epoch");
+    
+                message = new Message(message_id, posted_by, message_text, time_posted_epoch);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    
+        return message; 
+    }
+
 }
