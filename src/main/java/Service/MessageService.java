@@ -76,4 +76,9 @@ public class MessageService {
         return msgDAO.updateMessageByID(id,newMessage);
     }
 
+    // get messages by account id
+    public List<Message> getMessagesByAccountID (int id) {
+        //call dao
+        return msgDAO.getMessageByAccountID(id);
+    }
 }

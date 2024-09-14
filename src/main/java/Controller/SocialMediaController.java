@@ -26,11 +26,12 @@ public class SocialMediaController {
     // no-arg constructor
 
     public SocialMediaController() {
-        // Initialize userService here (either a default or mock implementation)
+        // no arg constructor - need it to run the unit tests
         this.userService = new UserService(new UserDAO());
         this.messageService = new MessageService(new MessageDAO(), new UserDAO());
     }
 
+    // arg constructor
     public SocialMediaController(UserService userService, MessageService messageService) {
         this.userService = userService;
         this.messageService = messageService;
@@ -206,9 +207,16 @@ public class SocialMediaController {
         }
     }
 
-    // Req 8
-    private void getAllMessagesByUser(Context ctx) {
+    /*
+     * Req 8 get all messages by account id - send empty list if there are no messages
+     */
+    private void getAllMessagesByUser(Context ctx) { 
+        //parse id
+        int id = Integer.parseInt(ctx.pathParam("account_id"));
 
+        // call service
+        List<Message> messages = messageService.getMessagesByAccountID(id);
+        ctx.json(messages);
     }
 
 

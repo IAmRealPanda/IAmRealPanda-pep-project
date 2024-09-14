@@ -26,7 +26,7 @@ public class MessageDAO {
             //execute
             preparedStatement.executeUpdate();
             ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
-            //return the new account object
+            //return the new message object
             if(pkeyResultSet.next()){
                 int generated_mesg_id = (int) pkeyResultSet.getLong(1); // grab the id
                 return new Message(generated_mesg_id, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch());
@@ -160,5 +160,31 @@ public class MessageDAO {
         return message;
     }
 
+    // get message by account id
+    public List<Message> getMessageByAccountID(int accID) {
+        List<Message> messages = new ArrayList<>();
+
+        try {
+            // sql query
+            String sql="select * from message where posted_by = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, accID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // loop and create list of message
+            while (resultSet.next()) {
+                int messageId = resultSet.getInt("message_id");
+                String messageText = resultSet.getString("message_text");
+                long timePostedEpoch = resultSet.getLong("time_posted_epoch");
+
+                Message message = new Message(messageId, accID, messageText, timePostedEpoch);
+                messages.add(message);
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return messages;
+    }
 
 }
